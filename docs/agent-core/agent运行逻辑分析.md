@@ -280,42 +280,42 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant Loop as "_run_with_session"
+    participant Iter as "_run_with_session"
     participant Sink as "on_event 回调"
     participant Session as "ProviderSession"
     participant RT as "AgentToolRuntime"
     participant FE as "前端(WebSocket)"
 
-    Note over Loop: === Phase 2 — 流式 LLM 决策 ===
-    Loop->>Loop: 生成 assistant/thinking event_id
-    Loop->>Sink: 定义 on_event 闭包
-    Loop->>Session: stream_turn(on_event)
+    Note over Iter: === Phase 2 — 流式 LLM 决策 ===
+    Iter->>Iter: 生成 assistant/thinking event_id
+    Iter->>Sink: 定义 on_event 闭包
+    Iter->>Session: stream_turn(on_event)
     Session->>Sink: assistant_delta(text)
     Sink->>FE: "assistant" 消息(带 event_id)
     Session->>Sink: thinking_delta(text)
     Sink->>FE: "thinking" 消息
     Session->>Sink: tool_call_delta(create_file 半成品参数)
-    Sink->>Loop: _handle_streamed_tool_delta
-    Loop->>FE: toolStart + setCode(增量预览)
+    Sink->>Iter: _handle_streamed_tool_delta
+    Iter->>FE: toolStart + setCode(增量预览)
 
-    Note over Loop: === Phase 3 — 终止判定与预算检查 ===
+    Note over Iter: === Phase 3 — 终止判定与预算检查 ===
     alt turn.tool_calls 为空
-        Loop->>Loop: return _finalize_response(text)
+        Iter->>Iter: return _finalize_response(text)
     else 有工具调用且花费 > $3
-        Loop-->>Loop: raise BudgetExceededError
+        Iter-->>Iter: raise BudgetExceededError
     end
 
-    Note over Loop: === Phase 4 — 工具批量执行 ===
+    Note over Iter: === Phase 4 — 工具批量执行 ===
     loop 每个 tool_call
-        Loop->>FE: toolStart(name, 摘要输入)
-        Loop->>RT: execute(tool_call)
-        RT-->>Loop: ToolExecutionResult
-        Loop->>FE: setCode(若 updated_content) + toolResult
+        Iter->>FE: toolStart(name, 摘要输入)
+        Iter->>RT: execute(tool_call)
+        RT-->>Iter: ToolExecutionResult
+        Iter->>FE: setCode(若 updated_content) + toolResult
     end
 
-    Note over Loop: === Phase 5 — 结果回填与循环控制 ===
-    Loop->>Session: append_tool_results(turn, executed_calls)
-    Note over Loop: 进入下一轮 或 30 轮耗尽熔断
+    Note over Iter: === Phase 5 — 结果回填与循环控制 ===
+    Iter->>Session: append_tool_results(turn, executed_calls)
+    Note over Iter: 进入下一轮 或 30 轮耗尽熔断
 ```
 
 📂 每个 Phase 的逐步展开详见 `step内部流程/` 目录（6 个概述 + 15 个子步骤详解）。
