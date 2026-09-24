@@ -1,6 +1,6 @@
 import os
 
-NUM_VARIANTS = 4
+NUM_VARIANTS = int(os.environ.get("NUM_VARIANTS", "4"))
 NUM_VARIANTS_VIDEO = 2
 
 # LLM-related
@@ -11,6 +11,25 @@ OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", None)
 
 # Image generation (optional)
 REPLICATE_API_KEY = os.environ.get("REPLICATE_API_KEY", None)
+
+# Zhipu GLM (experimental): OpenAI Chat Completions-compatible endpoint.
+# Key is env-only (like REPLICATE); not configurable from the settings dialog.
+# Default is the GLM Coding Plan subscription endpoint — the pay-as-you-go
+# api/paas/v4 endpoint returns 1113 "余额不足" for coding-plan keys.
+ZHIPU_API_KEY = os.environ.get("ZHIPU_API_KEY", None)
+ZHIPU_BASE_URL = os.environ.get(
+    "ZHIPU_BASE_URL", "https://open.bigmodel.cn/api/coding/paas/v4"
+)
+# glm thinking burns minutes per turn (observed 63k reasoning chars before the
+# first output token on a dashboard screenshot). Default off for flash-tier
+# latency; set ZHIPU_THINKING=1 to compare quality with thinking on.
+ZHIPU_THINKING = os.environ.get("ZHIPU_THINKING", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+    "enabled",
+}
 
 # Debugging-related
 IS_DEBUG_ENABLED = bool(os.environ.get("IS_DEBUG_ENABLED", False))

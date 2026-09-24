@@ -74,3 +74,10 @@ OPENAI_ONLY_MODELS = (
     Llm.GPT_5_5_HIGH,
     Llm.GPT_5_5_LOW,
 )
+
+# Zhipu-only (experimental): env key ZHIPU_API_KEY, no other provider key.
+# Single-entry pool cycles across all variant slots (4 on create, 2 on update);
+# variants differ only by sampling temperature, not by model.
+ZHIPU_ONLY_MODELS = (
+    Llm.GLM_5_3_FLASH,
+)

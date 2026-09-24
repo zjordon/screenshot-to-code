@@ -212,8 +212,10 @@ class TestModelSelectionNoKeys:
         self.model_selector = ModelSelectionStage(mock_throw_error)
 
     @pytest.mark.asyncio
-    async def test_no_keys_raises_error(self):
+    async def test_no_keys_raises_error(self, monkeypatch):
         """No keys: Should raise an exception"""
+        # Isolate from a real ZHIPU_API_KEY set in the developer environment.
+        monkeypatch.setattr("routes.generate_code.ZHIPU_API_KEY", None)
         with pytest.raises(Exception, match="No API key"):
             await self.model_selector.select_models(
                 generation_type="create",

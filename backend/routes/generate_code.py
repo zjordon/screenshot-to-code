@@ -19,6 +19,7 @@ from config import (
     OPENAI_API_KEY,
     OPENAI_BASE_URL,
     REPLICATE_API_KEY,
+    ZHIPU_API_KEY,
 )
 from custom_types import InputMode
 from llm import (
@@ -74,6 +75,7 @@ from routes.model_choice_sets import (
     OPENAI_ANTHROPIC_MODELS,
     OPENAI_ONLY_MODELS,
     VIDEO_VARIANT_MODELS,
+    ZHIPU_ONLY_MODELS,
 )
 
 # from utils import pprint_prompt
@@ -444,6 +446,7 @@ class ModelSelectionStage:
             await self.throw_error(
                 "No OpenAI, Anthropic, or Gemini API key found. Please add the environment variable "
                 "OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY to backend/.env or in the settings dialog. "
+                "(Experimental: a ZHIPU_API_KEY in backend/.env also works.) "
                 "If you add it to .env, make sure to restart the backend server."
             )
             raise Exception("No API key")
@@ -488,6 +491,9 @@ class ModelSelectionStage:
             models = list(ANTHROPIC_ONLY_MODELS)
         elif openai_api_key:
             models = list(OPENAI_ONLY_MODELS)
+        elif ZHIPU_API_KEY:
+            # Experimental: Zhipu-only pool (env key, see config.py).
+            models = list(ZHIPU_ONLY_MODELS)
         else:
             raise Exception("No OpenAI or Anthropic key")
 

@@ -9,10 +9,11 @@ from agent.providers.anthropic import AnthropicProviderSession, serialize_anthro
 from agent.providers.base import ProviderSession
 from agent.providers.gemini import GeminiProviderSession, serialize_gemini_tools
 from agent.providers.openai import OpenAIProviderSession, serialize_openai_tools
+from agent.providers.zhipu import ZhipuProviderSession, serialize_zhipu_tools
 from agent.tools import canonical_tool_definitions
-from config import REPLICATE_API_KEY
+from config import REPLICATE_API_KEY, ZHIPU_API_KEY, ZHIPU_BASE_URL
 from fs_logging.agent_runs import AgentRunRecorder
-from llm import ANTHROPIC_MODELS, GEMINI_MODELS, OPENAI_MODELS, Llm
+from llm import ANTHROPIC_MODELS, GEMINI_MODELS, GLM_MODELS, OPENAI_MODELS, Llm
 from preview_screenshot import is_screenshot_preview_available
 
 
@@ -74,6 +75,25 @@ def create_provider_session(
             model=model,
             prompt_messages=prompt_messages,
             tools=serialize_gemini_tools(canonical_tools),
+            recorder=recorder,
+        )
+
+    if model in GLM_MODELS:
+        # Zhipu key is env-only (ZHIPU_API_KEY), like REPLICATE.
+        if not ZHIPU_API_KEY:
+            raise Exception(
+                "Zhipu API key is missing. Add ZHIPU_API_KEY to backend/.env."
+            )
+
+        client = AsyncOpenAI(
+            api_key=ZHIPU_API_KEY,
+            base_url=ZHIPU_BASE_URL,
+        )
+        return ZhipuProviderSession(
+            client=client,
+            model=model,
+            prompt_messages=prompt_messages,
+            tools=serialize_zhipu_tools(canonical_tools),
             recorder=recorder,
         )
 
